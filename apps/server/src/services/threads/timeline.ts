@@ -131,6 +131,7 @@ import {
   keepTimelineProjectionFold,
 } from "./timeline-projection-fold.js";
 import {
+  timelineThinWindowCheck,
   timelineTurnSplitter,
   selectTimelineWindowStart,
   lookupLatestTimelineSelection,
@@ -1371,10 +1372,18 @@ function selectStandardTimelineEventRows(
           epochSequenceStart,
           eventBudget,
           hints,
+          isThinWindow: timelineThinWindowCheck(db, {
+            beforeSequence,
+            epochSequenceStart,
+            eventBudget,
+            excludeDiagnosticEvents,
+            threadId: thread.id,
+          }),
           segmentLimit: page.segmentLimit,
           splitTurnAt: timelineTurnSplitter(db, {
             epochSequenceStart,
             eventBudget,
+            flatTurnDisplay,
             maxSeq,
             threadId: thread.id,
           }),
