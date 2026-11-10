@@ -301,6 +301,7 @@ async function createFactoryHarness(
     displayWorkAreas: [{ height: 900, width: 1440, x: 0, y: 0 }],
     icon: undefined,
     isMac: true,
+    isMacGlass: false,
     isLinuxTransparent: false,
     isLinuxFrameless: false,
     shouldUseDarkColors() {
@@ -564,6 +565,26 @@ describe("desktop window factory", () => {
       }
     },
   );
+
+  it("keeps the macOS glass window background clear with vibrancy and no transparent window when the page supplies a theme color", async () => {
+    const { createdWindows, factory } = await createFactoryHarness({
+      isMacGlass: true,
+    });
+    await factory.createWindow({ initialUrl: null, stateKey: null });
+    const window = createdWindows[0];
+    if (!window) throw new Error("Expected a window");
+    expect(window.options).toMatchObject({
+      backgroundColor: "#00000000",
+      titleBarStyle: "hiddenInset",
+      vibrancy: "under-window",
+      visualEffectState: "active",
+    });
+    expect(window.options).not.toHaveProperty("transparent");
+    for (const listener of window.webContents.themeColorListeners) {
+      listener(new Event("did-change-theme-color"), "#29344a");
+    }
+    expect(window.backgroundColor).toBe("#00000000");
+  });
 
   it("preserves transparent Linux backgrounds when the page supplies an opaque theme color", async () => {
     const { createdWindows, factory } = await createFactoryHarness({

@@ -4,21 +4,34 @@ import {
 } from "@bb/desktop-contract";
 
 type DesktopReleaseChannel = "latest" | "nightly";
+type DesktopFlavor = "bb" | "glass";
 
 interface DesktopReleaseInfo {
-  appId: "dev.bb.desktop" | "dev.bb.desktop.nightly";
-  applicationName: "bb" | "bb Nightly";
+  appId: "dev.bb.desktop" | "dev.bb.desktop.nightly" | "dev.bbglass.desktop";
+  applicationName: "bb" | "bb Nightly" | "BB Glass";
   channel: DesktopReleaseChannel;
-  iconFileName: "icon.png" | "icon-nightly.png";
+  iconFileName: "icon.png" | "icon-nightly.png" | "icon-glass.png";
   releaseTag: "desktop-latest" | "desktop-nightly";
   updateReleaseBaseUrl: string;
 }
 
 export function createDesktopReleaseInfo(
   channel: DesktopReleaseChannel,
+  flavor: DesktopFlavor,
 ): DesktopReleaseInfo {
   const nightly = channel === "nightly";
   const releaseTag = nightly ? "desktop-nightly" : "desktop-latest";
+
+  if (flavor === "glass") {
+    return {
+      appId: "dev.bbglass.desktop",
+      applicationName: "BB Glass",
+      channel,
+      iconFileName: "icon-glass.png",
+      releaseTag,
+      updateReleaseBaseUrl: `https://github.com/get-bb/bb/releases/download/${releaseTag}/`,
+    };
+  }
 
   return {
     appId: nightly ? "dev.bb.desktop.nightly" : "dev.bb.desktop",
@@ -48,8 +61,11 @@ function resolveBuiltDesktopReleaseChannel(
 export const DESKTOP_RELEASE_CHANNEL = resolveBuiltDesktopReleaseChannel(
   process.env.BB_DESKTOP_RELEASE_CHANNEL,
 );
+export const DESKTOP_FLAVOR: DesktopFlavor =
+  process.env.BB_DESKTOP_FLAVOR === "glass" ? "glass" : "bb";
 export const DESKTOP_RELEASE_INFO = createDesktopReleaseInfo(
   DESKTOP_RELEASE_CHANNEL,
+  DESKTOP_FLAVOR,
 );
 const DESKTOP_UPDATE_RELEASE_BASE_URL =
   DESKTOP_RELEASE_INFO.updateReleaseBaseUrl;
@@ -86,6 +102,9 @@ interface ResolveDesktopUpdateSupportArgs {
 export function resolveDesktopUpdateSupport(
   args: ResolveDesktopUpdateSupportArgs,
 ): DesktopUpdateSupport {
+  if (DESKTOP_FLAVOR === "glass") {
+    return { autoUpdate: false, versionCheck: false };
+  }
   if (args.platform === "macos" || args.platform === "windows") {
     return { autoUpdate: true, versionCheck: true };
   }

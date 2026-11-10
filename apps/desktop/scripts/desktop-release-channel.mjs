@@ -1,4 +1,19 @@
 const DESKTOP_RELEASE_CHANNEL_ENV_NAME = "BB_DESKTOP_RELEASE_CHANNEL";
+const DESKTOP_FLAVOR_ENV_NAME = "BB_DESKTOP_FLAVOR";
+
+export function resolveDesktopFlavor(env) {
+  const rawFlavor = env[DESKTOP_FLAVOR_ENV_NAME]?.trim();
+  if (rawFlavor === undefined || rawFlavor.length === 0) {
+    return "bb";
+  }
+  if (rawFlavor === "bb" || rawFlavor === "glass") {
+    return rawFlavor;
+  }
+
+  throw new Error(
+    `${DESKTOP_FLAVOR_ENV_NAME} must be bb or glass, got ${rawFlavor}.`,
+  );
+}
 
 export function resolveDesktopReleaseChannel(env) {
   const rawChannel = env[DESKTOP_RELEASE_CHANNEL_ENV_NAME]?.trim();
@@ -30,7 +45,24 @@ export function resolveDesktopBuildPlatform(nodePlatform) {
   );
 }
 
-export function createDesktopReleaseConfig(channel) {
+export function createDesktopReleaseConfig(channel, flavor) {
+  if (flavor === "glass") {
+    return {
+      appId: "dev.bbglass.desktop",
+      applicationName: "BB Glass",
+      artifactName: "bb-glass-${version}-${arch}.${ext}",
+      iconFileName: "icon-glass.png",
+      linuxExecutableName: "bb-glass",
+      macIconPath: "assets/icon-glass.icns",
+      releaseTag: "desktop-glass",
+      windowsInstallName: "bb-glass",
+      updateMetadataFileNames: {
+        linux: "latest-linux.yml",
+        macos: "latest-mac.yml",
+        windows: "latest.yml",
+      },
+    };
+  }
   if (channel === "nightly") {
     return {
       appId: "dev.bb.desktop.nightly",

@@ -6,7 +6,7 @@ import { createDesktopLogger } from "./desktop-logger.js";
 import { attachServerUpdateControl } from "./server-update-control.js";
 import { registerServerChoiceIpc } from "./server-choice-ipc.js";
 import { randomUUID } from "node:crypto";
-import { accessSync, constants as fsConstants } from "node:fs";
+import { accessSync, constants as fsConstants, readFileSync } from "node:fs";
 import { arch, homedir, release, type as osType } from "node:os";
 import { dirname, join, resolve } from "node:path";
 import {
@@ -195,6 +195,7 @@ import { createDesktopUpdateService } from "./desktop-update-check.js";
 import {
   createDesktopUpdateFeedUrl,
   DESKTOP_RELEASE_CHANNEL,
+  DESKTOP_FLAVOR,
   DESKTOP_RELEASE_INFO,
   resolveDesktopUpdateSupport,
 } from "./desktop-update-provider.js";
@@ -446,6 +447,7 @@ let serverTargetGeneration = 0;
 let connectAccountServers: ConnectAccountServer[] = [];
 let connectServerSyncSkipReason: ConnectServerSyncSkipReason | null = null;
 let builtinServerUrl: string = DEFAULT_BB_SERVER_URL;
+let glassWindowCss: string | null = null;
 let desktopBridgePath: string | null = null;
 let desktopUserDataPath: string | null = null;
 let builtinDataDir: string | null = null;
@@ -1120,6 +1122,12 @@ function registerApplicationWindow(browserWindow: DesktopBrowserWindow): void {
     nativeWindow.on("resize", layoutFindView);
     nativeWindow.on("enter-full-screen", layoutFindView);
     nativeWindow.on("leave-full-screen", layoutFindView);
+    const css = glassWindowCss;
+    if (css !== null) {
+      nativeWindow.webContents.on("dom-ready", () => {
+        void nativeWindow.webContents.insertCSS(css);
+      });
+    }
   }
   registerApplicationRendererReloadShortcut(
     (browserWindow as BrowserWindow).webContents,
@@ -2954,11 +2962,7 @@ async function runDesktopApp(): Promise<void> {
     },
   });
 
-  app.setAppUserModelId(
-    DESKTOP_RELEASE_CHANNEL === "nightly"
-      ? "dev.bb.desktop.nightly"
-      : "dev.bb.desktop",
-  );
+  app.setAppUserModelId(DESKTOP_RELEASE_INFO.appId);
   if (app.isPackaged) {
     await hostToolchain.refresh();
     Object.assign(process.env, hostToolchain.environment());
@@ -2969,6 +2973,12 @@ async function runDesktopApp(): Promise<void> {
   }
 
   const paths = createDesktopPathContext();
+  if (process.platform === "darwin" && DESKTOP_FLAVOR === "glass") {
+    glassWindowCss = readFileSync(
+      join(paths.appPath, "assets", "glass-window.css"),
+      "utf8",
+    );
+  }
   const devIcon = !paths.isPackaged || process.env.BB_DESKTOP_DEV_ICON === "1";
   const iconPath = resolveDesktopIconPath({
     devIcon,
@@ -3379,6 +3389,7 @@ async function runDesktopApp(): Promise<void> {
       platform: process.platform,
     }),
     isMac: process.platform === "darwin",
+    isMacGlass: glassWindowCss !== null,
     isLinuxFrameless: hasLinuxWindowArgument({
       argument: LINUX_FRAMELESS_WINDOW_ARGUMENT,
       argv: process.argv,

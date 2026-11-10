@@ -4,6 +4,7 @@ import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import {
   createDesktopReleaseConfig,
+  resolveDesktopFlavor,
   createDesktopUpdateReleaseBaseUrl,
   resolveDesktopReleaseChannel,
 } from "./desktop-release-channel.mjs";
@@ -161,7 +162,8 @@ function createSigningPlan(env) {
 function resolveElectronBuilderConfig(baseConfig, env, electronBuilderArgs) {
   const signingPlan = createSigningPlan(env);
   const releaseChannel = resolveDesktopReleaseChannel(env);
-  const releaseConfig = createDesktopReleaseConfig(releaseChannel);
+  const flavor = resolveDesktopFlavor(env);
+  const releaseConfig = createDesktopReleaseConfig(releaseChannel, flavor);
   const config = cloneJson(baseConfig);
   const mac = {
     ...config.mac,
@@ -197,13 +199,16 @@ function resolveElectronBuilderConfig(baseConfig, env, electronBuilderArgs) {
   config.appId = releaseConfig.appId;
   config.artifactName = releaseConfig.artifactName;
   config.productName = releaseConfig.applicationName;
-  config.publish = [
-    {
-      channel: releaseChannel,
-      provider: "generic",
-      url: createDesktopUpdateReleaseBaseUrl(releaseConfig.releaseTag),
-    },
-  ];
+  config.publish =
+    flavor === "glass"
+      ? null
+      : [
+          {
+            channel: releaseChannel,
+            provider: "generic",
+            url: createDesktopUpdateReleaseBaseUrl(releaseConfig.releaseTag),
+          },
+        ];
 
   return {
     config,

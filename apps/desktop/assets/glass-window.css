@@ -1,0 +1,45 @@
+html:root {
+  --glass-tint: var(--canvas);
+  --background: color-mix(in oklab, var(--glass-tint) 44%, transparent);
+  --card: color-mix(in oklab, var(--glass-tint) 40%, transparent);
+  --popover: color-mix(in oklab, var(--glass-tint) 90%, transparent);
+  --sidebar: transparent;
+  --sidebar-accent: color-mix(in oklab, var(--ink) 11%, transparent);
+  --muted: color-mix(in oklab, var(--ink) 9%, transparent);
+  --border: color-mix(in oklab, var(--ink) 13%, transparent);
+  --border-hairline: color-mix(in oklab, var(--ink) 14%, transparent);
+  --border-seam: color-mix(in oklab, var(--ink) 9%, transparent);
+  --sidebar-border: color-mix(in oklab, var(--ink) 12%, transparent);
+  --surface-recessed-solid: color-mix(in oklab, var(--ink) 7%, transparent);
+  --surface-recessed-soft-solid: color-mix(
+    in oklab,
+    var(--ink) 5%,
+    transparent
+  );
+  --surface-raised-solid: color-mix(in oklab, var(--ink) 4%, transparent);
+  --surface-scrim: color-mix(in oklab, var(--glass-tint) 60%, transparent);
+  background: transparent;
+}
+
+html:root body {
+  background: transparent;
+}
+
+html:root :where(form[class~="group/promptbox"]) {
+  background-color: color-mix(in oklab, var(--ink) 7%, transparent);
+  backdrop-filter: blur(20px) saturate(140%);
+}
+
+html:root
+  :where(
+    [data-radix-popper-content-wrapper] > *,
+    [role="menu"],
+    [role="listbox"],
+    [role="dialog"]
+  ) {
+  backdrop-filter: blur(24px) saturate(160%);
+}
+
+html:root :where([role="dialog"], [role="alertdialog"]).bg-background {
+  background-color: var(--popover);
+}

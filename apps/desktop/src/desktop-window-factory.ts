@@ -116,6 +116,7 @@ interface CreateDesktopWindowFactoryArgs {
   icon: DesktopWindowIcon;
   isLinuxTransparent: boolean;
   isMac: boolean;
+  isMacGlass: boolean;
   isLinuxFrameless: boolean;
   isQuitting(): boolean;
   shouldUseDarkColors(): boolean;
@@ -169,6 +170,7 @@ interface CreateWindowOptionsArgs {
   icon: DesktopWindowIcon;
   isLinuxTransparent: boolean;
   isMac: boolean;
+  isMacGlass: boolean;
   isLinuxFrameless: boolean;
   preloadPath: string;
 }
@@ -212,6 +214,13 @@ function createWindowOptions(
           trafficLightPosition: MACOS_TRAFFIC_LIGHT_POSITION,
         }
       : { autoHideMenuBar: true }),
+    ...(args.isMacGlass
+      ? {
+          backgroundColor: "#00000000",
+          vibrancy: "under-window" as const,
+          visualEffectState: "active" as const,
+        }
+      : {}),
     height: args.bounds.height,
     icon: args.icon,
     minHeight: MIN_WINDOW_HEIGHT,
@@ -323,11 +332,12 @@ export function createDesktopWindowFactory(
           icon: args.icon,
           isLinuxTransparent: args.isLinuxTransparent,
           isMac: args.isMac,
+          isMacGlass: args.isMacGlass,
           isLinuxFrameless: args.isLinuxFrameless,
           preloadPath: args.preloadPath,
         }),
       );
-      if (!args.isLinuxTransparent) {
+      if (!args.isLinuxTransparent && !args.isMacGlass) {
         browserWindow.webContents.on(
           "did-change-theme-color",
           (_event, color) => {

@@ -1,4 +1,5 @@
 export type DesktopReleaseChannel = "latest" | "nightly";
+export type DesktopFlavor = "bb" | "glass";
 export type DesktopBuildPlatform = "macos" | "linux" | "windows";
 
 export interface DesktopUpdateMetadataFileNames {
@@ -8,20 +9,25 @@ export interface DesktopUpdateMetadataFileNames {
 }
 
 export interface DesktopReleaseConfig {
-  appId: "dev.bb.desktop" | "dev.bb.desktop.nightly";
-  applicationName: "bb" | "bb Nightly";
+  appId: "dev.bb.desktop" | "dev.bb.desktop.nightly" | "dev.bbglass.desktop";
+  applicationName: "bb" | "bb Nightly" | "BB Glass";
   artifactName: string;
-  iconFileName: "icon.png" | "icon-nightly.png";
-  linuxExecutableName: "bb" | "bb-nightly";
-  macIconPath: "assets/icon.icns" | "assets/icon-nightly.icns";
-  releaseTag: "desktop-latest" | "desktop-nightly";
+  iconFileName: "icon.png" | "icon-nightly.png" | "icon-glass.png";
+  linuxExecutableName: "bb" | "bb-nightly" | "bb-glass";
+  macIconPath:
+    | "assets/icon.icns"
+    | "assets/icon-nightly.icns"
+    | "assets/icon-glass.icns";
+  releaseTag: "desktop-latest" | "desktop-nightly" | "desktop-glass";
   updateMetadataFileNames: DesktopUpdateMetadataFileNames;
-  windowsInstallName: "bb" | "bb-nightly";
+  windowsInstallName: "bb" | "bb-nightly" | "bb-glass";
 }
 
 export function resolveDesktopReleaseChannel(
   env: NodeJS.ProcessEnv,
 ): DesktopReleaseChannel;
+
+export function resolveDesktopFlavor(env: NodeJS.ProcessEnv): DesktopFlavor;
 
 export function resolveDesktopBuildPlatform(
   nodePlatform: string,
@@ -29,6 +35,7 @@ export function resolveDesktopBuildPlatform(
 
 export function createDesktopReleaseConfig(
   channel: DesktopReleaseChannel,
+  flavor: DesktopFlavor,
 ): DesktopReleaseConfig;
 
 export function createDesktopUpdateReleaseBaseUrl(

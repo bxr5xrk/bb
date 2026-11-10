@@ -587,7 +587,7 @@ describe("electron-builder signing config", () => {
     const { config } = await readResolvedConfig({
       BB_DESKTOP_RELEASE_CHANNEL: "nightly",
     });
-    const nightlyRelease = createDesktopReleaseInfo("nightly");
+    const nightlyRelease = createDesktopReleaseInfo("nightly", "bb");
 
     expect(config.appId).toBe("dev.bb.desktop.nightly");
     expect(config.productName).toBe("bb Nightly");

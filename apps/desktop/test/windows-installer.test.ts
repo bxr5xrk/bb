@@ -37,9 +37,9 @@ describe("Windows installer mutex name", () => {
     "matches the APP_GUID electron-builder gives the %s NSIS installer",
     (channel) => {
       const electronBuilderGuid = loadElectronBuilderUuid();
-      const releaseInfo = createDesktopReleaseInfo(channel);
+      const releaseInfo = createDesktopReleaseInfo(channel, "bb");
 
-      expect(releaseInfo.appId).toBe(createDesktopReleaseConfig(channel).appId);
+      expect(releaseInfo.appId).toBe(createDesktopReleaseConfig(channel, "bb").appId);
       expect(createWindowsInstallerMutexName(releaseInfo.appId)).toBe(
         electronBuilderGuid(releaseInfo.appId),
       );
